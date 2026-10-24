@@ -34,6 +34,7 @@ $ copier update -a .github/.copier-ci-answers.yml template
 * `.github/workflows/ci.yml`: the shared workflow.
 * `.github/.copier-ci-answers.yml`: the record of which release of this template the workflow came from.
 * `VERSION`: the project's version, starting at `v0.1.0`. The project owns this file; updates never overwrite it.
+* `renovate.json`: extends the shared Renovate settings below. The project owns this file too, so it can add its own rules underneath.
 
 
 ### What a Project Must Provide
@@ -61,6 +62,24 @@ Bump `VERSION` on every branch:
 The workflow is read-only apart from the release job, which needs write access to publish the release and read access to pull requests for its notes. It runs on `pull_request`, never `pull_request_target`, so code from a fork never runs with the repository's credentials. Actions are pinned to commit SHAs, and Node and the Dev Container CLI to exact versions.
 
 
+### Shared Renovate Settings
+
+`default.json` at the root of this repository holds the Renovate settings shared by every template and project. Any repository uses them with:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>karshosphere/template-github-ci"]
+}
+```
+* Updates are proposed weekly, before 6am on Sunday Melbourne time, once a release is at least 7 days old.
+* Minor, patch and digest updates arrive as one grouped pull request, and majors on their own.
+* Renovate never touches `VERSION`, so bump it on the pull request before merging. Each pull request carries a reminder.
+* Versions marked with a `# renovate:` comment in workflows and Dockerfiles are kept up to date too.
+
+Changes to `default.json` reach every repository on Renovate's next run once merged, with no `copier update` needed.
+
+
 ### This Repository's CI
 
-`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Renovate (`renovate.json`) proposes updates to the pinned versions in both.
+`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Renovate, through the shared settings, proposes updates to the pinned versions in both.

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "shared Renovate settings for karshosphere templates and the projects generated from them",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests",
+    ":semanticCommitScopeDisabled"
+  ],
+  "timezone": "Australia/Melbourne",
+  "schedule": ["before 6am on sunday"],
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "dependencyDashboard": true,
+  "automerge": false,
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "prBodyNotes": [
+    "Bump `VERSION` on this branch before merging: `Y` for minor and patch updates, `X` if a major update is a breaking change."
+  ],
+  "packageRules": [
+    {
+      "description": "one weekly pull request for every non-major update, so VERSION is bumped once",
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
+      "groupName": "non-major dependencies",
+      "groupSlug": "non-major"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "versions marked with a renovate comment on the line above",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/", "/(^|/)Dockerfile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)\\s+(?:ARG |ENV )?[\\w-]+[:=] *\"?(?<currentValue>[^\\s\"@]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"?"
+      ]
+    }
+  ]
+}
