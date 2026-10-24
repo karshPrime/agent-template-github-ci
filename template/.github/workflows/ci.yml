@@ -54,10 +54,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: run.sh is present and executable
+      - name: Makefile is present
         run: |
-          [ -x run.sh ] || {
-            echo "::error file=run.sh::run.sh is missing or not executable"
+          [ -f Makefile ] || {
+            echo "::error::Makefile is missing from the project root"
             exit 1
           }
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -67,13 +67,13 @@ jobs:
       - name: Start the dev container
         run: devcontainer up --workspace-folder .
       - name: Format
-        run: devcontainer exec --workspace-folder . ./run.sh --format-dry-run
+        run: devcontainer exec --workspace-folder . make format-dry-run
       - name: Build
-        run: devcontainer exec --workspace-folder . ./run.sh --build
+        run: devcontainer exec --workspace-folder . make build
       - name: Test
-        run: devcontainer exec --workspace-folder . ./run.sh --test
+        run: devcontainer exec --workspace-folder . make test
       - name: Release build
-        run: devcontainer exec --workspace-folder . ./run.sh --release
+        run: devcontainer exec --workspace-folder . make release
       - if: github.event_name == 'push'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

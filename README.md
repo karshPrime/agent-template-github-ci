@@ -39,20 +39,20 @@ $ copier update -a .github/.copier-ci-answers.yml template
 
 ### What a Project Must Provide
 
-* `run.sh` at the project root, executable, accepting:
-  * `--format-dry-run`: check formatting without changing files.
-  * `--build`: build the project.
-  * `--test`: run the tests.
-  * `--release`: build every release target the project ships, writing the files to attach to the GitHub release directly into `dist/`. A project with no release targets leaves `dist/` empty.
-  * Each exits non-zero on failure, and on any flag it does not know.
-* `.devcontainer/devcontainer.json`: CI runs every `run.sh` check inside it, so the toolchain is the one the project already defines.
+* A `Makefile` at the project root, with these targets:
+  * `format-dry-run`: check formatting without changing files.
+  * `build`: build the project.
+  * `test`: run the tests.
+  * `release`: build every release target the project ships, writing the files to attach to the GitHub release directly into `dist/`. A project with no release targets leaves `dist/` empty.
+  * Each fails on error. Longer actions can live in `scripts/` and be called from the Makefile.
+* `.devcontainer/devcontainer.json`, with `make` installed: CI runs every target inside it, so the toolchain is the one the project already defines.
 
 
 ### The Workflow
 
 * **version:** on every pull request and push to `main`, checks that `VERSION` is a single `vX.Y.Z` line, higher than every existing `vX.Y.Z` tag. A branch that does not bump `VERSION` fails here.
-* **checks:** starts the dev container, then runs `./run.sh --format-dry-run`, `--build`, `--test` and `--release` inside it, each as its own step. Running `--release` on pull requests means a broken release build fails before merge.
-* **release:** on push to `main`, once both jobs pass, publishes a GitHub release named after `VERSION`, which also creates the tag. Its notes are the description of the pull request that was merged, and every file `--release` left directly in `dist/` is attached. The release is only published once every file is attached.
+* **checks:** starts the dev container, then runs `make format-dry-run`, `make build`, `make test` and `make release` inside it, each as its own step. Running `make release` on pull requests means a broken release build fails before merge.
+* **release:** on push to `main`, once both jobs pass, publishes a GitHub release named after `VERSION`, which also creates the tag. Its notes are the description of the pull request that was merged, and every file `make release` left directly in `dist/` is attached. The release is only published once every file is attached.
 
 Bump `VERSION` on every branch:
 * `Z` for minor fixes.

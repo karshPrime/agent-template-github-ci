@@ -8,4 +8,4 @@ _skip_if_exists:
   - renovate.json
 
 #===============================================================================
-# No questions: the workflow only relies on run.sh, VERSION and .devcontainer/
+# No questions: the workflow only relies on the Makefile, VERSION and .devcontainer/
