@@ -63,4 +63,4 @@ The workflow is read-only apart from the release job, which needs write access t
 
 ### This Repository's CI
 
-`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own. Renovate (`renovate.json`) proposes updates to the pinned versions in both.
+`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Renovate (`renovate.json`) proposes updates to the pinned versions in both.
