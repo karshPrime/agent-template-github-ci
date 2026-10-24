@@ -82,4 +82,4 @@ Changes to `default.json` reach every repository on Renovate's next run once mer
 
 ### This Repository's CI
 
-`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Renovate, through the shared settings, proposes updates to the pinned versions in both.
+`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Runner labels newer than the pinned actionlint are declared in `.github/actionlint.yaml`. Renovate, through the shared settings, proposes updates to the pinned versions in both.
