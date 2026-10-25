@@ -33,7 +33,7 @@ $ copier update -a .github/.copier-ci-answers.yml template
 
 * `.github/workflows/ci.yml`: the shared workflow.
 * `.github/.copier-ci-answers.yml`: the record of which release of this template the workflow came from.
-* `VERSION`: the project's version, starting at `v0.1.0`. The project owns this file; updates never overwrite it.
+* `VERSION`: the project's version as a plain `X.Y.Z`, starting at `0.1.0`. The project owns this file; updates never overwrite it.
 * `renovate.json`: extends the shared Renovate settings below. The project owns this file too, so it can add its own rules underneath.
 
 
@@ -50,14 +50,20 @@ $ copier update -a .github/.copier-ci-answers.yml template
 
 ### The Workflow
 
-* **version:** on every pull request and push to `main`, checks that `VERSION` is a single `vX.Y.Z` line, higher than every existing `vX.Y.Z` tag. A branch that does not bump `VERSION` fails here.
+* **version:** on every pull request and push to `main`, checks that `VERSION` is a single `X.Y.Z` line, without a leading `v`, higher than every existing `vX.Y.Z` tag. A branch that does not bump `VERSION` fails here.
 * **checks:** starts the dev container, then runs `make format-dry-run`, `make build`, `make test` and `make release` inside it, each as its own step. Running `make release` on pull requests means a broken release build fails before merge.
-* **release:** on push to `main`, once both jobs pass, publishes a GitHub release named after `VERSION`, which also creates the tag. Its notes are the description of the pull request that was merged, and every file `make release` left directly in `dist/` is attached. The release is only published once every file is attached.
+* **release:** on push to `main`, once both jobs pass, publishes a GitHub release named `v` plus `VERSION`, such as `v1.2.3`, which also creates the tag. Its notes are the description of the pull request that was merged, and every file `make release` left directly in `dist/` is attached. The release is only published once every file is attached.
 
 Bump `VERSION` on every branch:
 * `Z` for minor fixes.
 * `Y` for minor features and chores.
 * `X` for breaking changes.
+
+Projects generated before 3.0.0 hold `vX.Y.Z` in `VERSION`. Remove the leading `v` once when updating to 3.0.0, or the version check fails:
+
+```bash
+$ sed -i 's/^v//' VERSION
+```
 
 The workflow is read-only apart from the release job, which needs write access to publish the release and read access to pull requests for its notes. It runs on `pull_request`, never `pull_request_target`, so code from a fork never runs with the repository's credentials. Actions are pinned to commit SHAs, and Node and the Dev Container CLI to exact versions.
 
