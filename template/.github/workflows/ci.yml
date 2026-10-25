@@ -30,20 +30,21 @@ jobs:
           persist-credentials: false
           # full history, so every existing release tag is available to compare against
           fetch-depth: 0
-      - name: VERSION holds a single vX.Y.Z version
+      - name: VERSION holds a single X.Y.Z version
         run: |
-          if ! grep -Eqx 'v[0-9]+\.[0-9]+\.[0-9]+' VERSION || [ "$(grep -c "" VERSION)" -ne 1 ]; then
-            echo "::error file=VERSION::VERSION must be one line of the form vX.Y.Z"
+          if ! grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+' VERSION || [ "$(grep -c "" VERSION)" -ne 1 ]; then
+            echo "::error file=VERSION::VERSION must be one line of the form X.Y.Z, without a leading v"
             exit 1
           fi
       - name: VERSION is higher than every release tag
         run: |
-          version=$(tr -d '[:space:]' < VERSION)
+          # release tags are the version with a leading v
+          version=v$(tr -d '[:space:]' < VERSION)
           latest=$(git tag --list --sort=-v:refname | { grep -Ex 'v[0-9]+\.[0-9]+\.[0-9]+' || true; } | sed -n 1p)
           if [ -n "$latest" ]; then
             highest=$(printf '%s\n' "$latest" "$version" | sort -V | tail -n 1)
             if [ "$version" = "$latest" ] || [ "$highest" != "$version" ]; then
-              echo "::error file=VERSION::VERSION is $version but $latest is already released; bump it above $latest"
+              echo "::error file=VERSION::VERSION is ${version#v} but $latest is already released; bump it above ${latest#v}"
               exit 1
             fi
           fi
@@ -96,7 +97,7 @@ jobs:
         with:
           persist-credentials: false
       - id: version
-        run: echo "tag=$(tr -d "[:space:]" < VERSION)" >> "$GITHUB_OUTPUT"
+        run: echo "tag=v$(tr -d "[:space:]" < VERSION)" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           # a pattern rather than a name, so a missing artifact means no files instead of a failure
