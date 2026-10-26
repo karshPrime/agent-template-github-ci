@@ -2,6 +2,8 @@
 
 ## Added
 
+* 3.0.1
+   * the changelog lists changes under the version they were released in, newest first
 * 3.0.0
    * VERSION holds a plain X.Y.Z and CI adds the v for release tags
    * existing projects remove the v from VERSION once
