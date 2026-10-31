@@ -33,7 +33,6 @@ $ copier update -a .github/.copier-ci-answers.yml template
 
 * `.github/workflows/ci.yml`: the shared workflow.
 * `.github/.copier-ci-answers.yml`: the record of which release of this template the workflow came from.
-* `VERSION`: the project's version as a plain `X.Y.Z`, starting at `0.1.0`. The project owns this file; updates never overwrite it.
 * `renovate.json`: extends the shared Renovate settings below. The project owns this file too, so it can add its own rules underneath.
 
 
@@ -45,25 +44,25 @@ $ copier update -a .github/.copier-ci-answers.yml template
   * `test`: run the tests.
   * `release`: build every release target the project ships, writing the files to attach to the GitHub release directly into `dist/`. A project with no release targets leaves `dist/` empty.
   * Each fails on error. Longer actions can live in `scripts/` and be called from the Makefile.
+  * CI passes the version being released to every target as `VERSION=X.Y.Z`. Anything that reports the version should use it, falling back to `git describe --tags` for local builds.
 * `.devcontainer/devcontainer.json`, with `make` installed: CI runs every target inside it, so the toolchain is the one the project already defines.
 
 
 ### The Workflow
 
-* **version:** on every pull request and push to `main`, checks that `VERSION` is a single `X.Y.Z` line, without a leading `v`, higher than every existing `vX.Y.Z` tag. A branch that does not bump `VERSION` fails here.
-* **checks:** starts the dev container, then runs `make format-dry-run`, `make build`, `make test` and `make release` inside it, each as its own step. Running `make release` on pull requests means a broken release build fails before merge.
-* **release:** on push to `main`, once both jobs pass, publishes a GitHub release named `v` plus `VERSION`, such as `v1.2.3`, which also creates the tag. Its notes are the description of the pull request that was merged, and every file `make release` left directly in `dist/` is attached. The release is only published once every file is attached.
+* **version:** on every pull request and push to `main`, works out the next version from the last `vX.Y.Z` tag and the commits since it, and shows it as a notice on the run. A pull request shows the version merging it would release.
+* **checks:** starts the dev container, then runs `make format-dry-run`, `make build`, `make test` and `make release` inside it, each as its own step and each given `VERSION=X.Y.Z`. Running `make release` on pull requests means a broken release build fails before merge.
+* **release:** on push to `main`, once both jobs pass, publishes a GitHub release named `v` plus the version, such as `v1.2.3`, which also creates the tag. Its notes are the description of the pull request that was merged, and every file `make release` left directly in `dist/` is attached. The release is only published once every file is attached.
 
-Bump `VERSION` on every branch:
-* `Z` for minor fixes.
-* `Y` for minor features and chores.
-* `X` for breaking changes.
+The version comes from the commit messages, so there is no file to bump:
+* `X` when any commit is marked breaking, with `!` after its type, such as `feat!:`, or a `BREAKING CHANGE:` line in its body.
+* `Y` when any commit starts with `feat:`.
+* `Z` for everything else, such as `fix:`, `chore:` and `docs:`, which includes Renovate's updates.
+* The biggest one wins, and a project's first release is `0.1.0`.
 
-Projects generated before 3.0.0 hold `vX.Y.Z` in `VERSION`. Remove the leading `v` once when updating to 3.0.0, or the version check fails:
+Merges to `main` are released one at a time, in order. If several land while a run is queued, the next release takes in all of them, with each pull request's description under its own heading. A squash merge is judged by the squashed commit's title alone.
 
-```bash
-$ sed -i 's/^v//' VERSION
-```
+Projects generated before 4.0.0 hold their version in `VERSION`. Updating to 4.0.0 removes it, and the existing tags carry on as before.
 
 The workflow is read-only apart from the release job, which needs write access to publish the release and read access to pull requests for its notes. It runs on `pull_request`, never `pull_request_target`, so code from a fork never runs with the repository's credentials. Actions are pinned to commit SHAs, and Node and the Dev Container CLI to exact versions.
 
@@ -80,7 +79,7 @@ The workflow is read-only apart from the release job, which needs write access t
 ```
 * Renovate only opens or updates pull requests before 6am on Sunday Melbourne time, security updates included, once a release is at least 7 days old.
 * Every update, majors too, arrives in one grouped pull request.
-* Renovate never touches `VERSION`, so bump `Z` on the pull request before merging, or `X` for a breaking major update. Each pull request carries a reminder.
+* Renovate's commits are `chore:`, so merging its pull request releases a `Z` bump with no other change.
 * Versions marked with a `# renovate:` comment in workflows and Dockerfiles are kept up to date too.
 
 Changes to `default.json` reach every repository on Renovate's next run once merged, with no `copier update` needed.
@@ -88,4 +87,4 @@ Changes to `default.json` reach every repository on Renovate's next run once mer
 
 ### This Repository's CI
 
-`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same `VERSION` checks and tag on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Runner labels newer than the pinned actionlint are declared in `.github/actionlint.yaml`. Renovate, through the shared settings, proposes updates to the pinned versions in both.
+`.github/workflows/ci.yml` at the root checks this repository itself, not the projects: the same version from its commits and a GitHub release on merge, plus `actionlint` over both the shipped workflow and its own, using a pinned shellcheck rather than the runner's preinstalled one so results match a local run. Runner labels newer than the pinned actionlint are declared in `.github/actionlint.yaml`. Renovate, through the shared settings, proposes updates to the pinned versions in both.
