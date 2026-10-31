@@ -21,12 +21,9 @@
   "automerge": false,
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
-  "prBodyNotes": [
-    "Bump `Z` in `VERSION` on this branch before merging, or `X` if a major update is a breaking change."
-  ],
   "packageRules": [
     {
-      "description": "one weekly pull request for every update, so VERSION is bumped once",
+      "description": "one weekly pull request for every update, merged as a single release",
       "matchPackageNames": ["*"],
       "groupName": "all dependencies",
       "groupSlug": "all"
