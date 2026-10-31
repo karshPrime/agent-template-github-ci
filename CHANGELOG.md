@@ -2,6 +2,10 @@
 
 ## Added
 
+* 3.1.0
+   * Renovate only opens or updates pull requests before 6am on Sunday, security updates included
+   * every update, majors too, arrives in one grouped pull request
+   * the reminder on each pull request asks for a Z bump in VERSION
 * 3.0.1
    * the changelog lists changes under the version they were released in, newest first
 * 3.0.0

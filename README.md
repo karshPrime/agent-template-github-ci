@@ -78,9 +78,9 @@ The workflow is read-only apart from the release job, which needs write access t
   "extends": ["github>karshosphere/template-github-ci"]
 }
 ```
-* Updates are proposed weekly, before 6am on Sunday Melbourne time, once a release is at least 7 days old.
-* Minor, patch and digest updates arrive as one grouped pull request, and majors on their own.
-* Renovate never touches `VERSION`, so bump it on the pull request before merging. Each pull request carries a reminder.
+* Renovate only opens or updates pull requests before 6am on Sunday Melbourne time, security updates included, once a release is at least 7 days old.
+* Every update, majors too, arrives in one grouped pull request.
+* Renovate never touches `VERSION`, so bump `Z` on the pull request before merging, or `X` for a breaking major update. Each pull request carries a reminder.
 * Versions marked with a `# renovate:` comment in workflows and Dockerfiles are kept up to date too.
 
 Changes to `default.json` reach every repository on Renovate's next run once merged, with no `copier update` needed.
