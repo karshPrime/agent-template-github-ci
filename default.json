@@ -9,6 +9,12 @@
   ],
   "timezone": "Australia/Melbourne",
   "schedule": ["before 6am on sunday"],
+  "updateNotScheduled": false,
+  "vulnerabilityAlerts": {
+    "schedule": ["before 6am on sunday"]
+  },
+  "separateMajorMinor": false,
+  "separateMultipleMajor": false,
   "minimumReleaseAge": "7 days",
   "internalChecksFilter": "strict",
   "dependencyDashboard": true,
@@ -16,14 +22,14 @@
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
   "prBodyNotes": [
-    "Bump `VERSION` on this branch before merging: `Y` for minor and patch updates, `X` if a major update is a breaking change."
+    "Bump `Z` in `VERSION` on this branch before merging, or `X` if a major update is a breaking change."
   ],
   "packageRules": [
     {
-      "description": "one weekly pull request for every non-major update, so VERSION is bumped once",
-      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
-      "groupName": "non-major dependencies",
-      "groupSlug": "non-major"
+      "description": "one weekly pull request for every update, so VERSION is bumped once",
+      "matchPackageNames": ["*"],
+      "groupName": "all dependencies",
+      "groupSlug": "all"
     }
   ],
   "customManagers": [
